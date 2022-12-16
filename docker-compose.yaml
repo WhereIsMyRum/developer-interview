@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  transaction-api:
+    container_name: tansaction-api
+    build:
+      context: .
+      target: dev
+      dockerfile: docker/Dockerfile
+    command: "npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/node/transaction-api/node_modules
+      - ./src:/home/node/transaction-api/src
+      - ./dist:/home/node/transaction-api/dist
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: "transactions"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - my-db:/var/lib/mysql
+      - ./transaction.sql:/docker-entrypoint-initdb.d/transaction.sql
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  my-db:
